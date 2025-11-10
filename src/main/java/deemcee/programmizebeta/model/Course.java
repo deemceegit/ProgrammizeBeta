@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public class Course {
-    private Integer course_id;
+    private Integer courseId;
     private String courseName;
     private BigDecimal listedPrice;
     private BigDecimal salePrice;
@@ -27,10 +27,20 @@ public class Course {
     }
 
     public int getCourseId() {
-        return course_id;
+        return courseId;
     }
-    public void setId(Integer id) {
-        this.course_id = course_id;
+    public void setCourseId(Integer courseId) {
+        this.courseId = courseId;
+    }
+
+    // Alternative getter for JSP compatibility (${course.id})
+    public Integer getId() {
+        return courseId;
+    }
+
+    // Alternative setter for backward compatibility
+    public void setId(Integer courseId) {
+        this.courseId = courseId;
     }
 
     public String getCourseName() {
@@ -47,10 +57,10 @@ public class Course {
         this.listedPrice = listedPrice;
     }
 
-    public BigDecimal getsalePrice() {
+    public BigDecimal getSalePrice() {
         return salePrice;
     }
-    public void setsalePrice(BigDecimal salePrice) {
+    public void setSalePrice(BigDecimal salePrice) {
         this.salePrice = salePrice;
     }
 
@@ -79,7 +89,7 @@ public class Course {
     @Override
     public String toString() {
         return "Course{" +
-                "course_id=" + course_id +
+                "courseId=" + courseId +
                 ", courseName='" + courseName + '\'' +
                 ", listedPrice=" + listedPrice +
                 ", salePrice=" + salePrice +
@@ -97,7 +107,7 @@ public class Course {
 
         Course course = (Course) o;
 
-        if (course_id != course.course_id) return false;
+        if (!Objects.equals(courseId, course.courseId)) return false;
         if (!Objects.equals(courseName, course.courseName)) return false;
         if (!Objects.equals(listedPrice, course.listedPrice)) return false;
         if (!Objects.equals(salePrice, course.salePrice)) return false;
@@ -108,7 +118,7 @@ public class Course {
 
     @Override
     public int hashCode() {
-        int result = course_id;
+        int result = courseId;
         result = 31 * result + (courseName != null ? courseName.hashCode() : 0);
         result = 31 * result + (listedPrice != null ? listedPrice.hashCode() : 0);
         result = 31 * result + (salePrice != null ? salePrice.hashCode() : 0);
