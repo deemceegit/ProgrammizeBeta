@@ -6,6 +6,8 @@ import java.util.Objects;
 public class Course {
     private Integer courseId;
     private String courseName;
+    private String courseCategory;
+    private String courseInstructor;
     private BigDecimal listedPrice;
     private BigDecimal salePrice;
     private String thumbnailUrl;
@@ -16,9 +18,11 @@ public class Course {
 
 
     // Parameterized constructor
-    public Course(String courseName, String thumbnailUrl, String description,
+    public Course(String courseName,String courseCategory, String courseInstructor, String thumbnailUrl, String description,
                   BigDecimal listedPrice, BigDecimal salePrice, String status) {
         this.courseName = courseName;
+        this.courseCategory = courseCategory;
+        this.courseInstructor = courseInstructor;
         this.thumbnailUrl = thumbnailUrl;
         this.description = description;
         this.listedPrice = listedPrice;
@@ -33,12 +37,10 @@ public class Course {
         this.courseId = courseId;
     }
 
-    // Alternative getter for JSP compatibility (${course.id})
+    // Alt getter and setter for JSP compatibility
     public Integer getId() {
         return courseId;
     }
-
-    // Alternative setter for backward compatibility
     public void setId(Integer courseId) {
         this.courseId = courseId;
     }
@@ -48,6 +50,20 @@ public class Course {
     }
     public void setCourseName(String courseName) {
         this.courseName = courseName;
+    }
+
+    public String getCourseCategory() {
+        return courseCategory;
+    }
+    public void setCourseCategory(String courseCategory) {
+        this.courseCategory = courseCategory;
+    }
+
+    public String getCourseInstructor() {
+        return courseInstructor;
+    }
+    public void setCourseInstructor(String courseInstructor) {
+        this.courseInstructor = courseInstructor;
     }
 
     public BigDecimal getListedPrice() {
@@ -91,6 +107,8 @@ public class Course {
         return "Course{" +
                 "courseId=" + courseId +
                 ", courseName='" + courseName + '\'' +
+                ", courseCategory='" + courseCategory + '\'' +
+                ", courseInstructor='" + courseInstructor + '\'' +
                 ", listedPrice=" + listedPrice +
                 ", salePrice=" + salePrice +
                 ", thumbnailUrl='" + thumbnailUrl + '\'' +
@@ -109,6 +127,8 @@ public class Course {
 
         if (!Objects.equals(courseId, course.courseId)) return false;
         if (!Objects.equals(courseName, course.courseName)) return false;
+        if (!Objects.equals(courseCategory, course.courseCategory)) return false;
+        if (!Objects.equals(courseInstructor, course.courseInstructor)) return false;
         if (!Objects.equals(listedPrice, course.listedPrice)) return false;
         if (!Objects.equals(salePrice, course.salePrice)) return false;
         if (!Objects.equals(thumbnailUrl, course.thumbnailUrl)) return false;
@@ -120,6 +140,8 @@ public class Course {
     public int hashCode() {
         int result = courseId;
         result = 31 * result + (courseName != null ? courseName.hashCode() : 0);
+        result = 31 * result + (courseCategory != null ? courseCategory.hashCode() : 0);
+        result = 31 * result + (courseInstructor != null ? courseInstructor.hashCode() : 0);
         result = 31 * result + (listedPrice != null ? listedPrice.hashCode() : 0);
         result = 31 * result + (salePrice != null ? salePrice.hashCode() : 0);
         result = 31 * result + (thumbnailUrl != null ? thumbnailUrl.hashCode() : 0);

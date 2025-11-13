@@ -35,13 +35,13 @@ public class CourseListServlet extends HttpServlet {
                 sortColumn, sortOrder);
 
 //        // Get filter options
-//        List<String> categories = courseDAO.getAllCategories();
-//        List<String> instructors = courseDAO.getAllInstructors();
+        List<String> categories = courseDAO.getAllCategories();
+        List<String> instructors = courseDAO.getAllInstructors();
 
         // Set attributes for JSP
         request.setAttribute("courses", courses);
-//        request.setAttribute("categories", categories);
-//        request.setAttribute("instructors", instructors);
+        request.setAttribute("categories", categories);
+        request.setAttribute("instructors", instructors);
         request.setAttribute("selectedCategory", category);
         request.setAttribute("selectedInstructor", instructor);
         request.setAttribute("selectedStatus", status);

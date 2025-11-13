@@ -89,3 +89,13 @@ tr:hover {
     padding: 40px;
     color: #666;
 }
+
+.course-link {
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.course-link:hover {
+    text-decoration: none;
+    color: #1f48c4;
+}

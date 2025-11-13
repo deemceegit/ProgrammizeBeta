@@ -1,5 +1,6 @@
-package deemcee.programmizebeta.dao;
+package deemcee.programmizebeta;
 
+import deemcee.programmizebeta.dao.CourseDAO; 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

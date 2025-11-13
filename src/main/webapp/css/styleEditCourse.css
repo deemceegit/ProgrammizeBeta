@@ -1,0 +1,178 @@
+* {
+    box-sizing: border-box;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #f7f9fc;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* ====== CONTAINER ====== */
+.container {
+    max-width: 700px;
+    background: #fff;
+    margin: 40px auto;
+    padding: 40px 50px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ====== HEADER ====== */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    margin: 0;
+    color: #2d5be3;
+    font-size: 1.8rem;
+}
+
+.header p {
+    color: #666;
+    margin-top: 5px;
+}
+
+/* ====== FORM ====== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.required {
+    color: #e74c3c;
+}
+
+/* ====== INPUTS ====== */
+input[type="text"],
+input[type="number"],
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #d0d7e1;
+    border-radius: 6px;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+    font-size: 15px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+    border-color: #2d5be3;
+    box-shadow: 0 0 0 3px rgba(45, 91, 227, 0.15);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ====== READ-ONLY DISPLAY ====== */
+.course-id-display {
+    background: #f3f6fa;
+    padding: 10px 12px;
+    border: 1px solid #d6dce5;
+    border-radius: 6px;
+    color: #555;
+}
+
+/* ====== FORM ROWS ====== */
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+/* ====== HELP TEXT ====== */
+.help-text {
+    font-size: 13px;
+    color: #777;
+    margin-top: 4px;
+}
+
+/* ====== RADIO BUTTONS ====== */
+input[type="radio"] {
+    accent-color: #2d5be3;
+    transform: scale(1.1);
+    margin-right: 5px;
+}
+
+.form-group div label {
+    font-weight: 500;
+    cursor: pointer;
+    color: #444;
+}
+
+.form-group div label:hover {
+    color: #2d5be3;
+}
+
+/* ====== BUTTONS ====== */
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 15px;
+}
+
+.btn-primary {
+    background-color: #2d5be3;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #1f48c4;
+}
+
+.btn-secondary {
+    background-color: #e0e5ec;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background-color: #d4dae2;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 600px) {
+    .container {
+        padding: 25px 20px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .button-group {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+}

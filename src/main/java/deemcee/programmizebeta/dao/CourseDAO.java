@@ -1,5 +1,6 @@
 package deemcee.programmizebeta.dao;
 
+import deemcee.programmizebeta.DatabaseConnection;
 import deemcee.programmizebeta.model.Course;
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,8 +14,6 @@ public class CourseDAO {
                                       String sortColumn, String sortOrder) {
         List<Course> courses = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM courses WHERE 1=1");
-
-        // Since category and instructor don't exist in database, skip those filters
 
         if (status != null && !status.isEmpty() && !status.equals("All Statuses") && !status.equals("")) {
             sql.append(" AND status = ?");
@@ -80,9 +79,11 @@ public class CourseDAO {
 
             while (rs.next()) {
                 Course course = new Course();
-                course.setCourseId(rs.getInt("course_id"));  // Fixed: use setCourseId
+                course.setCourseId(rs.getInt("course_id"));
                 course.setThumbnailUrl(rs.getString("thumbnail_url"));
                 course.setCourseName(rs.getString("course_name"));
+                course.setCourseCategory(rs.getString("course_category"));
+                course.setCourseInstructor(rs.getString("course_instructor"));
                 course.setListedPrice(rs.getBigDecimal("listed_price"));
                 course.setSalePrice(rs.getBigDecimal("sale_price"));
                 course.setDescription(rs.getString("description"));
@@ -109,6 +110,47 @@ public class CourseDAO {
         return courses;
     }
 
+    // ✅ NEW: Get all distinct categories
+    public List<String> getAllCategories() {
+        List<String> categories = new ArrayList<>();
+        String sql = "SELECT DISTINCT course_category FROM courses WHERE course_category IS NOT NULL ORDER BY course_category";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String category = rs.getString("course_category");
+                if (category != null && !category.trim().isEmpty()) {
+                    categories.add(category);
+                }
+            }
+            System.out.println("Retrieved " + categories.size() + " categories");
+        } catch (SQLException e) {
+            System.err.println("Error getting categories: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return categories;
+    }
+    // ✅ NEW: Get all distinct instructors
+    public List<String> getAllInstructors() {
+        List<String> instructors = new ArrayList<>();
+        String sql = "SELECT DISTINCT course_instructor FROM courses WHERE course_instructor IS NOT NULL ORDER BY course_instructor";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String instructor = rs.getString("course_instructor");
+                if (instructor != null && !instructor.trim().isEmpty()) {
+                    instructors.add(instructor);
+                }
+            }
+            System.out.println("Retrieved " + instructors.size() + " instructors");
+        } catch (SQLException e) {
+            System.err.println("Error getting instructors: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return instructors;
+    }
+
     // Delete course by ID
     public boolean deleteCourse(int courseId) {
         String sql = "DELETE FROM courses WHERE course_id = ?";
@@ -117,7 +159,10 @@ public class CourseDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, courseId);
-            return stmt.executeUpdate() > 0;
+            int rowsAffected = stmt.executeUpdate();
+
+            System.out.println("Delete course ID " + courseId + ": " + rowsAffected + " rows affected");
+            return rowsAffected > 0;
 
         } catch (SQLException e) {
             System.err.println("Error deleting course: " + e.getMessage());
@@ -131,6 +176,8 @@ public class CourseDAO {
         String sql = "SELECT * FROM courses WHERE course_id = ?";
         Course course = null;
 
+        System.out.println("Getting course by ID: " + courseId); // Debug
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -139,13 +186,19 @@ public class CourseDAO {
 
             if (rs.next()) {
                 course = new Course();
-                course.setCourseId(rs.getInt("course_id"));  // Fixed: use setCourseId
+                course.setCourseId(rs.getInt("course_id"));
                 course.setThumbnailUrl(rs.getString("thumbnail_url"));
                 course.setCourseName(rs.getString("course_name"));
+                course.setCourseCategory(rs.getString("course_category"));
+                course.setCourseInstructor(rs.getString("course_instructor"));
                 course.setListedPrice(rs.getBigDecimal("listed_price"));
                 course.setSalePrice(rs.getBigDecimal("sale_price"));
                 course.setDescription(rs.getString("description"));
                 course.setStatus(rs.getString("status"));
+
+                System.out.println("Found course: " + course.getCourseName()); // Debug
+            } else {
+                System.out.println("No course found with ID: " + courseId); // Debug
             }
         } catch (SQLException e) {
             System.err.println("Error getting course by ID: " + e.getMessage());
@@ -157,20 +210,25 @@ public class CourseDAO {
 
     // Add new course
     public boolean addCourse(Course course) {
-        String sql = "INSERT INTO courses (thumbnail_url, course_name, " +
-                "listed_price, sale_price, description, status) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO courses (thumbnail_url, course_name, course_category, course_instructor, " +
+                "listed_price, sale_price, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, course.getThumbnailUrl());
             stmt.setString(2, course.getCourseName());
-            stmt.setBigDecimal(3, course.getListedPrice());
-            stmt.setBigDecimal(4, course.getSalePrice());
-            stmt.setString(5, course.getDescription());
-            stmt.setString(6, course.getStatus());
+            stmt.setString(3, course.getCourseCategory());
+            stmt.setString(4, course.getCourseInstructor());
+            stmt.setBigDecimal(5, course.getListedPrice());
+            stmt.setBigDecimal(6, course.getSalePrice());
+            stmt.setString(7, course.getDescription());
+            stmt.setString(8, course.getStatus());
 
-            return stmt.executeUpdate() > 0;
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("Add course: " + rowsAffected + " rows affected");
+
+            return rowsAffected > 0;
 
         } catch (SQLException e) {
             System.err.println("Error adding course: " + e.getMessage());
@@ -181,24 +239,46 @@ public class CourseDAO {
 
     // Update existing course
     public boolean updateCourse(Course course) {
-        String sql = "UPDATE courses SET thumbnail_url=?, course_name=?, " +
+        String sql = "UPDATE courses SET thumbnail_url=?, course_name=?, course_category=?, course_instructor=?, " +
                 "listed_price=?, sale_price=?, description=?, status=? WHERE course_id=?";
+
+        System.out.println("=== UPDATE COURSE DEBUG ===");
+        System.out.println("Course ID: " + course.getCourseId());
+        System.out.println("Course Name: " + course.getCourseName());
+        System.out.println("Category: " + course.getCourseCategory());
+        System.out.println("Instructor: " + course.getCourseInstructor());
+        System.out.println("Listed Price: " + course.getListedPrice());
+        System.out.println("Sale Price: " + course.getSalePrice());
+        System.out.println("Status: " + course.getStatus());
+        System.out.println("SQL: " + sql);
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, course.getThumbnailUrl());
             stmt.setString(2, course.getCourseName());
-            stmt.setBigDecimal(3, course.getListedPrice());
-            stmt.setBigDecimal(4, course.getSalePrice());
-            stmt.setString(5, course.getDescription());
-            stmt.setString(6, course.getStatus());
-            stmt.setInt(7, course.getCourseId());  // Fixed: use getCourseId
+            stmt.setString(3, course.getCourseCategory());
+            stmt.setString(4, course.getCourseInstructor());
+            stmt.setBigDecimal(5, course.getListedPrice());
+            stmt.setBigDecimal(6, course.getSalePrice());
+            stmt.setString(7, course.getDescription());
+            stmt.setString(8, course.getStatus());
+            stmt.setInt(9, course.getCourseId());
 
-            return stmt.executeUpdate() > 0;
+            int rowsAffected = stmt.executeUpdate();
+
+            System.out.println("Update result: " + rowsAffected + " rows affected");
+
+            if (rowsAffected > 0) {
+                System.out.println("✓ Course updated successfully!");
+                return true;
+            } else {
+                System.out.println("✗ No rows updated - course ID may not exist");
+                return false;
+            }
 
         } catch (SQLException e) {
-            System.err.println("Error updating course: " + e.getMessage());
+            System.err.println("✗ Error updating course: " + e.getMessage());
             e.printStackTrace();
             return false;
         }

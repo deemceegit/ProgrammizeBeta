@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Course List</title>
-    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
 <div class="container">
@@ -26,6 +26,17 @@
         <form action="${pageContext.request.contextPath}/courseList" method="get">
             <input type="text" name="search" placeholder="Search courses..."
                    value="${param.search}" style="width: 300px;">
+            <select name="categories">
+                <option value="">All Categories</option>
+                <option value="1" ${param.status == '1' ? 'selected' : ''}>Active (1)</option>
+                <option value="0" ${param.status == '0' ? 'selected' : ''}>Inactive (0)</option>
+            </select>
+
+            <select name="instructors">
+                <option value="">All Instructors</option>
+                <option value="1" ${param.status == '1' ? 'selected' : ''}>Active (1)</option>
+                <option value="0" ${param.status == '0' ? 'selected' : ''}>Inactive (0)</option>
+            </select>
 
             <select name="status">
                 <option value="">All Statuses</option>
@@ -35,6 +46,7 @@
 
             <button type="submit" class="btn">Search</button>
             <a href="${pageContext.request.contextPath}/courseList" class="btn" style="background: #666;">Clear</a>
+            <a href="https://youtu.be/b52h7kraC3A?si=mTbimf7F13q0hKfQ" class="btn" style="float: right;">+ Add New Course</a>       <%--link to /courseDetail here--%>
         </form>
     </div>
 
@@ -59,6 +71,8 @@
                     <th>ID</th>
                     <th>Course Name</th>
                     <th>Description</th>
+                    <th>Category</th>
+                    <th>Instructor</th>
                     <th>Listed Price</th>
                     <th>Sale Price</th>
                     <th>Status</th>
@@ -70,7 +84,12 @@
                     <tr>
                         <td>${course.courseId != null ? course.courseId : course.id}</td>
                         <td>
-                            <strong>${course.courseName}</strong>
+                            <%--duong dan sang courseDetail page--%>
+                            <a href="${pageContext.request.contextPath}/courseDetail?id=${course.courseId}"
+
+                               class="course-link">
+                                <strong>${course.courseName}</strong>
+                            </a>
                         </td>
                         <td>
                             <c:choose>
@@ -83,6 +102,12 @@
                                     <em>No description</em>
                                 </c:otherwise>
                             </c:choose>
+                        </td>
+                        <td>
+                            <strong>${course.courseCategory}</strong>
+                        </td>
+                        <td>
+                            <strong>${course.courseInstructor}</strong>
                         </td>
                         <td>
                             <fmt:formatNumber value="${course.listedPrice}"
@@ -108,11 +133,11 @@
                             </c:choose>
                         </td>
                         <td>
-                            <a href="#" class="btn" style="padding: 4px 8px; font-size: 12px;">Edit</a>
-                            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;"
-                                    onclick="if(confirm('Delete this course?')) alert('Delete feature not implemented yet');">
-                                Delete
-                            </button>
+                            <a href="${pageContext.request.contextPath}/editCourse?id=${course.courseId}"
+                               class="btn"
+                               style="padding: 4px 8px; font-size: 12px; background: #4CAF50;">
+                                ✏️
+                            </a>
                         </td>
                     </tr>
                 </c:forEach>
