@@ -34,7 +34,7 @@ public class CourseListServlet extends HttpServlet {
                 status, searchKeyword,
                 sortColumn, sortOrder);
 
-//        // Get filter options
+        // Get filter options
         List<String> categories = courseDAO.getAllCategories();
         List<String> instructors = courseDAO.getAllInstructors();
 

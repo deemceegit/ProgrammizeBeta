@@ -1,6 +1,6 @@
 package deemcee.programmizebeta.dao;
 
-import deemcee.programmizebeta.DatabaseConnection;
+import deemcee.programmizebeta.util.DatabaseConnection;
 import deemcee.programmizebeta.model.Course;
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public class CourseDAO {
                                       String status, String searchKeyword,
                                       String sortColumn, String sortOrder) {
         List<Course> courses = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM courses WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT * FROM course WHERE 1=1");
 
         if (status != null && !status.isEmpty() && !status.equals("All Statuses") && !status.equals("")) {
             sql.append(" AND status = ?");
@@ -88,6 +88,8 @@ public class CourseDAO {
                 course.setSalePrice(rs.getBigDecimal("sale_price"));
                 course.setDescription(rs.getString("description"));
                 course.setStatus(rs.getString("status"));
+                course.setDuration(rs.getInt("duration"));
+                course.setInstructorId(rs.getInt("instructor_id"));
                 courses.add(course);
             }
 
@@ -110,10 +112,10 @@ public class CourseDAO {
         return courses;
     }
 
-    // ✅ NEW: Get all distinct categories
+    //  Get all distinct categories
     public List<String> getAllCategories() {
         List<String> categories = new ArrayList<>();
-        String sql = "SELECT DISTINCT course_category FROM courses WHERE course_category IS NOT NULL ORDER BY course_category";
+        String sql = "SELECT DISTINCT course_category FROM course WHERE course_category IS NOT NULL ORDER BY course_category";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -130,10 +132,10 @@ public class CourseDAO {
         }
         return categories;
     }
-    // ✅ NEW: Get all distinct instructors
+    //  Get all distinct instructors
     public List<String> getAllInstructors() {
         List<String> instructors = new ArrayList<>();
-        String sql = "SELECT DISTINCT course_instructor FROM courses WHERE course_instructor IS NOT NULL ORDER BY course_instructor";
+        String sql = "SELECT DISTINCT course_instructor FROM course WHERE course_instructor IS NOT NULL ORDER BY course_instructor";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -153,7 +155,7 @@ public class CourseDAO {
 
     // Delete course by ID
     public boolean deleteCourse(int courseId) {
-        String sql = "DELETE FROM courses WHERE course_id = ?";
+        String sql = "DELETE FROM course WHERE course_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -173,7 +175,7 @@ public class CourseDAO {
 
     // Get course by ID
     public Course getCourseById(int courseId) {
-        String sql = "SELECT * FROM courses WHERE course_id = ?";
+        String sql = "SELECT * FROM course WHERE course_id = ?";
         Course course = null;
 
         System.out.println("Getting course by ID: " + courseId); // Debug
@@ -195,6 +197,8 @@ public class CourseDAO {
                 course.setSalePrice(rs.getBigDecimal("sale_price"));
                 course.setDescription(rs.getString("description"));
                 course.setStatus(rs.getString("status"));
+                course.setDuration(rs.getInt("duration"));
+                course.setInstructorId(rs.getInt("instructor_id"));
 
                 System.out.println("Found course: " + course.getCourseName()); // Debug
             } else {
@@ -210,7 +214,7 @@ public class CourseDAO {
 
     // Add new course
     public boolean addCourse(Course course) {
-        String sql = "INSERT INTO courses (thumbnail_url, course_name, course_category, course_instructor, " +
+        String sql = "INSERT INTO course (thumbnail_url, course_name, course_category, course_instructor, " +
                 "listed_price, sale_price, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -239,7 +243,7 @@ public class CourseDAO {
 
     // Update existing course
     public boolean updateCourse(Course course) {
-        String sql = "UPDATE courses SET thumbnail_url=?, course_name=?, course_category=?, course_instructor=?, " +
+        String sql = "UPDATE course SET thumbnail_url=?, course_name=?, course_category=?, course_instructor=?, " +
                 "listed_price=?, sale_price=?, description=?, status=? WHERE course_id=?";
 
         System.out.println("=== UPDATE COURSE DEBUG ===");
@@ -283,4 +287,182 @@ public class CourseDAO {
             return false;
         }
     }
+    // Get public courses (active status) with filters
+    public List<Course> getPublicCourses(String searchKeyword, String[] categories) {
+        List<Course> courses = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM course WHERE status = 1"); // Only active courses
+
+        // Add search keyword filter
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            sql.append(" AND (course_name LIKE ? OR description LIKE ?)");
+        }
+
+        // Add category filter
+        if (categories != null && categories.length > 0 && !isAllCategoriesSelected(categories)) {
+            sql.append(" AND course_category IN (");
+            for (int i = 0; i < categories.length; i++) {
+                sql.append("?");
+                if (i < categories.length - 1) sql.append(",");
+            }
+            sql.append(")");
+        }
+
+        sql.append(" ORDER BY course_id DESC"); // Newest courses first
+
+        System.out.println("Public courses SQL: " + sql.toString());
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DatabaseConnection.getConnection();
+            if (conn == null) {
+                System.err.println("Failed to get database connection!");
+                return courses;
+            }
+
+            stmt = conn.prepareStatement(sql.toString());
+
+            int paramIndex = 1;
+
+            // Set search keyword parameters
+            if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+                String searchPattern = "%" + searchKeyword + "%";
+                stmt.setString(paramIndex++, searchPattern);
+                stmt.setString(paramIndex++, searchPattern);
+            }
+
+            // Set category parameters
+            if (categories != null && categories.length > 0 && !isAllCategoriesSelected(categories)) {
+                for (String category : categories) {
+                    stmt.setString(paramIndex++, category);
+                }
+            }
+
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Course course = new Course();
+                course.setCourseId(rs.getInt("course_id"));
+                course.setThumbnailUrl(rs.getString("thumbnail_url"));
+                course.setCourseName(rs.getString("course_name"));
+                course.setCourseCategory(rs.getString("course_category"));
+                course.setCourseInstructor(rs.getString("course_instructor"));
+                course.setListedPrice(rs.getBigDecimal("listed_price"));
+                course.setSalePrice(rs.getBigDecimal("sale_price"));
+                course.setDescription(rs.getString("description"));
+                course.setStatus(rs.getString("status"));
+                course.setDuration(rs.getInt("duration"));
+                course.setInstructorId(rs.getInt("instructor_id"));
+                courses.add(course);
+            }
+
+            System.out.println("Found " + courses.size() + " public courses");
+
+        } catch (SQLException e) {
+            System.err.println("Error getting public courses: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // Properly close resources
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return courses;
+    }
+
+    // Helper method to check if "All Categories" is selected
+    private boolean isAllCategoriesSelected(String[] categories) {
+        if (categories == null) return false;
+        for (String cat : categories) {
+            if ("all".equals(cat)) return true;
+        }
+        return false;
+    }
+
+//    // Get public courses (active status) with filters
+//    public List<Course> getPublicCourses(String searchKeyword, String[] categories) {
+//        List<Course> courses = new ArrayList<>();
+//        StringBuilder sql = new StringBuilder("SELECT * FROM course WHERE status = '1'"); // Only active courses
+//
+//        // Add search keyword filter
+//        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+//            sql.append(" AND (course_name LIKE ? OR description LIKE ?)");
+//        }
+//
+//        // Add category filter
+//        if (categories != null && categories.length > 0 && !isAllCategoriesSelected(categories)) {
+//            sql.append(" AND course_category IN (");
+//            for (int i = 0; i < categories.length; i++) {
+//                sql.append("?");
+//                if (i < categories.length - 1) sql.append(",");
+//            }
+//            sql.append(")");
+//        }
+//
+//        sql.append(" ORDER BY course_id DESC"); // Newest courses first
+//
+//        System.out.println("Public courses SQL: " + sql.toString());
+//
+//        try (Connection conn = DatabaseConnection.getConnection();
+//             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+//
+//            int paramIndex = 1;
+//
+//            // Set search keyword parameters
+//            if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+//                String searchPattern = "%" + searchKeyword + "%";
+//                stmt.setString(paramIndex++, searchPattern);
+//                stmt.setString(paramIndex++, searchPattern);
+//            }
+//
+//            // Set category parameters
+//            if (categories != null && categories.length > 0 && !isAllCategoriesSelected(categories)) {
+//                for (String category : categories) {
+//                    stmt.setString(paramIndex++, category);
+//                }
+//            }
+//
+//            ResultSet rs = stmt.executeQuery();
+//
+//            while (rs.next()) {
+//                Course course = new Course();
+//                course.setCourseId(rs.getInt("course_id"));
+//                course.setThumbnailUrl(rs.getString("thumbnail_url"));
+//                course.setCourseName(rs.getString("course_name"));
+//                course.setCourseCategory(rs.getString("course_category"));
+//                course.setCourseInstructor(rs.getString("course_instructor"));
+//                course.setListedPrice(rs.getBigDecimal("listed_price"));
+//                course.setSalePrice(rs.getBigDecimal("sale_price"));
+//                course.setDescription(rs.getString("description"));
+//                course.setStatus(rs.getString("status"));
+//                course.setDuration(rs.getInt("duration"));
+//                course.setInstructorId(rs.getInt("instructor_id"));
+//                courses.add(course);
+//            }
+//
+//            System.out.println("Found " + courses.size() + " public courses");
+//
+//        } catch (SQLException e) {
+//            System.err.println("Error getting public courses: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//
+//        return courses;
+//    }
+//
+//    // Helper method to check if "All Categories" is selected
+//    private boolean isAllCategoriesSelected(String[] categories) {
+//        if (categories == null) return false;
+//        for (String cat : categories) {
+//            if ("all".equals(cat)) return true;
+//        }
+//        return false;
+//    }
 }

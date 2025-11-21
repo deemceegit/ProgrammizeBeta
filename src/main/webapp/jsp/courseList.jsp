@@ -135,7 +135,7 @@
                         <td>
                             <a href="${pageContext.request.contextPath}/editCourse?id=${course.courseId}"
                                class="btn"
-                               style="padding: 4px 8px; font-size: 12px; background: #4CAF50;">
+                               style="padding: 4px 8px; font-size: 12px; background: #0D6EFD;">
                                 ✏️
                             </a>
                         </td>

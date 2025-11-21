@@ -13,13 +13,15 @@ public class Course {
     private String thumbnailUrl;
     private String description;
     private String status;
+    private Integer duration;
+    private Integer instructorId;
 
     public Course() {}
 
 
     // Parameterized constructor
     public Course(String courseName,String courseCategory, String courseInstructor, String thumbnailUrl, String description,
-                  BigDecimal listedPrice, BigDecimal salePrice, String status) {
+                  BigDecimal listedPrice, BigDecimal salePrice, String status, Integer duration,  Integer instructorId) {
         this.courseName = courseName;
         this.courseCategory = courseCategory;
         this.courseInstructor = courseInstructor;
@@ -28,6 +30,8 @@ public class Course {
         this.listedPrice = listedPrice;
         this.salePrice = salePrice;
         this.status = status;
+        this.duration = duration;
+        this.instructorId = instructorId;
     }
 
     public int getCourseId() {
@@ -99,6 +103,14 @@ public class Course {
     }
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Integer getDuration() {return duration;}
+    public void setDuration(Integer duration) {this.duration = duration;}
+
+    public Integer getInstructorId() {return instructorId;}
+    public void setInstructorId(Integer instructorId) {
+        this.instructorId = instructorId;
     }
 
     // Optional: Override toString() method for debugging purposes
